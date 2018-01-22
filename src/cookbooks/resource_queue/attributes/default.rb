@@ -29,20 +29,8 @@ default['firewall']['ipv6_enabled'] = false
 
 default['rabbitmq']['version'] = '3.6.15'
 
-default['hashicorp-vault']['config']['habackend_type'] = 'consul'
-default['hashicorp-vault']['config']['habackend_options']['address'] = '127.0.0.1:8500'
-default['hashicorp-vault']['config']['habackend_options']['check_timeout'] = '10s'
-default['hashicorp-vault']['config']['habackend_options']['disable_registration'] = false
-default['hashicorp-vault']['config']['habackend_options']['path'] = 'vault/'
-default['hashicorp-vault']['config']['habackend_options']['scheme'] = 'http'
-
-default['hashicorp-vault']['config']['tls_disable'] = true
+default['rabbitmq']['amqp_port'] = 5672
+default['rabbitmq']['http_port'] = 15_672
 
 default['rabbitmq']['service_user'] = 'rabbitmq'
 default['rabbitmq']['service_group'] = 'rabbitmq'
-
-default['hashicorp-vault']['consul_template_metrics_file'] = 'vault_metrics.ctmpl'
-default['hashicorp-vault']['consul_template_region_file'] = 'vault_region.ctmpl'
-
-default['hashicorp-vault']['metrics_file'] = 'metrics.hcl'
-default['hashicorp-vault']['region_file'] = 'region.hcl'
