@@ -44,15 +44,18 @@ end
 # CONNECT TO CONSUL
 #
 
-rabbitmq_vhost '/consul' do
+health_vhost = 'health'
+rabbitmq_vhost health_vhost do
   action :add
 end
 
-rabbitmq_user 'consul' do
+rabbitmq_consul_test_user = ''
+rabbitmq_consul_test_password = ''
+rabbitmq_user rabbitmq_consul_test_user do
   action :add
-  password ''
-  permissions ''
-  vhost ''
+  password rabbitmq_consul_test_password
+  permissions '' # health_vhost .* .* .*
+  vhost health_vhost
 end
 
 rabbitmq_proxy_path = node['rabbitmq']['proxy_path']
@@ -73,7 +76,7 @@ file '/etc/consul/conf.d/rabbitmq.json' do
         {
           "checks": [
             {
-              "http": "http://localhost:#{rabbitmq_http_port}",
+              "http": "http://#{rabbitmq_consul_test_user}:#{rabbitmq_consul_test_password}localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
               "id": "rabbitmq_health",
               "interval": "15s",
               "method": "GET",
