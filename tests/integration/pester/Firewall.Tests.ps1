@@ -49,6 +49,16 @@ Describe 'The firewall' {
         }
     }
 
+    Context 'should allow rabbitmq' {
+        It 'on port 5672'{
+            ($ufwOutput | Where-Object {$_ -match '(5672/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
+        }
+
+        It 'on port 15672' {
+            ($ufwOutput | Where-Object {$_ -match '(15672/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
+        }
+    }
+
     Context 'should allow unbound' {
         It 'on TCP port 53' {
             ($ufwOutput | Where-Object {$_ -match '(53/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
@@ -56,16 +66,6 @@ Describe 'The firewall' {
 
         It 'on UDP port 53' {
             ($ufwOutput | Where-Object {$_ -match '(53/udp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
-        }
-    }
-
-    Context 'should allow vault' {
-        It 'on port 8200'{
-            ($ufwOutput | Where-Object {$_ -match '(8200/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
-        }
-
-        It 'on port 8201' {
-            ($ufwOutput | Where-Object {$_ -match '(8201/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
         }
     }
 }
