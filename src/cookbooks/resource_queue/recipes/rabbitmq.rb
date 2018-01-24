@@ -2,7 +2,7 @@
 
 #
 # Cookbook Name:: resource_queue
-# Recipe:: vault
+# Recipe:: rabbitmq
 #
 # Copyright 2017, P. van der Velde
 #
@@ -16,7 +16,7 @@ include_recipe 'rabbitmq::mgmt_console'
 
 # Make sure the vault service doesn't start automatically. This will be changed
 # after we have provisioned the box
-service 'rabbitmq' do
+service 'rabbitmq-server' do
   action :enable
 end
 
@@ -49,13 +49,13 @@ rabbitmq_vhost health_vhost do
   action :add
 end
 
-rabbitmq_consul_test_user = ''
-rabbitmq_consul_test_password = ''
+rabbitmq_consul_test_user = 'consul'
+rabbitmq_consul_test_password = 'c0nsul'
 rabbitmq_user rabbitmq_consul_test_user do
   action :add
   password rabbitmq_consul_test_password
-  permissions '' # health_vhost .* .* .*
-  vhost health_vhost
+  permissions '.* .* .*'
+  vhost [health_vhost]
 end
 
 rabbitmq_proxy_path = node['rabbitmq']['proxy_path']
@@ -70,13 +70,13 @@ file '/etc/consul/conf.d/rabbitmq.json' do
           "name": "queue",
           "port": #{rabbitmq_amqp_port},
           "tags": [
-            "amqp",
+            "amqp"
           ]
         },
         {
           "checks": [
             {
-              "http": "http://#{rabbitmq_consul_test_user}:#{rabbitmq_consul_test_password}localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
+              "http": "http://#{rabbitmq_consul_test_user}:#{rabbitmq_consul_test_password}@localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
               "id": "rabbitmq_health",
               "interval": "15s",
               "method": "GET",

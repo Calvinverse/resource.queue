@@ -34,3 +34,5 @@ default['rabbitmq']['http_port'] = 15_672
 
 default['rabbitmq']['service_user'] = 'rabbitmq'
 default['rabbitmq']['service_group'] = 'rabbitmq'
+
+default['rabbitmq']['proxy_path'] = '/services/queue'
