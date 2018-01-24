@@ -522,7 +522,7 @@
         <!-- <TemplateTokenGenerators>UNDEFINED</TemplateTokenGenerators> -->
     </PropertyGroup>
     <PropertyGroup>
-        <LinuxImage Condition=" '$(LinuxImage)' == '' ">resource.secrets</LinuxImage>
+        <LinuxImage Condition=" '$(LinuxImage)' == '' ">resource.queue</LinuxImage>
     </PropertyGroup>
 
     <!--
