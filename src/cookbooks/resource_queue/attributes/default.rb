@@ -36,3 +36,6 @@ default['rabbitmq']['service_user'] = 'rabbitmq'
 default['rabbitmq']['service_group'] = 'rabbitmq'
 
 default['rabbitmq']['proxy_path'] = '/services/queue'
+
+default['rabbitmq']['consul_template_cluster_file'] = 'rabbitmq_cluster.ctmpl'
+default['rabbitmq']['script_cluster_file'] = '/tmp/rabbitmq_cluster.sh'
