@@ -20,4 +20,6 @@ include_recipe 'resource_queue::firewall'
 
 include_recipe 'resource_queue::meta'
 include_recipe 'resource_queue::provisioning'
+
+include_recipe 'resource_queue::erlang'
 include_recipe 'resource_queue::rabbitmq'

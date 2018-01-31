@@ -8,6 +8,13 @@ default['consul_template']['config_path'] = '/etc/consul-template.d/conf'
 default['consul_template']['template_path'] = '/etc/consul-template.d/templates'
 
 #
+# ERLANG
+#
+
+default['erlang']['install_method'] = 'esl'
+default['erlang']['esl']['version'] = '20.1.7'
+
+#
 # FIREWALL
 #
 
