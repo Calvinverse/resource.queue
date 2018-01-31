@@ -37,6 +37,55 @@ default['firewall']['ipv6_enabled'] = false
 default['rabbitmq']['version'] = '3.7.3'
 default['rabbitmq']['mnesiadir'] = '/srv/rabbitmq/data/mnesia'
 
+
+default['rabbitmq']['vhosts']['health'] = 'health'
+default['rabbitmq']['vhosts']['logs'] = 'logs'
+
+default['rabbitmq']['virtualhosts'] = [
+  default['rabbitmq']['vhosts']['health'],
+  default['rabbitmq']['vhosts']['logs']
+]
+
+default['rabbitmq']['users']['guest']['name'] = 'guest'
+default['rabbitmq']['users']['guest']['password'] = 'guest'
+default['rabbitmq']['users']['consul']['name'] = 'consul'
+default['rabbitmq']['users']['consul']['password'] = 'consul'
+
+default['rabbitmq']['enabled_users'] = [
+  {
+    name: default['rabbitmq']['users']['guest']['name'],
+    password: default['rabbitmq']['users']['guest']['password'],
+    rights: [
+      {
+        vhost: nil,
+        conf: '.*',
+        write: '.*',
+        read: '.*'
+      }
+    ]
+  },
+  {
+    name: default['rabbitmq']['users']['consul']['name'],
+    password: default['rabbitmq']['users']['consul']['password'],
+    rights: [
+      {
+        vhost: 'health',
+        conf: '.*',
+        write: '.*',
+        read: '.*'
+      }
+    ]
+  }
+]
+
+# loopback_users
+# List of users which are only permitted to connect to the broker via a loopback interface (i.e. localhost).
+# If you wish to allow the default guest user to connect remotely, you need to change this to [].
+default['rabbitmq']['loopback_users'] = [
+  default['rabbitmq']['users']['guest']['name'],
+  default['rabbitmq']['users']['consul']['name']
+]
+
 default['rabbitmq']['amqp_port'] = 5672
 default['rabbitmq']['http_port'] = 15_672
 

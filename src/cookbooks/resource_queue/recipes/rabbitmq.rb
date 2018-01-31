@@ -16,13 +16,7 @@ include_recipe 'rabbitmq::mgmt_console'
 include_recipe 'rabbitmq::user_management'
 include_recipe 'rabbitmq::virtualhost_management'
 
-# Make sure the vault service doesn't start automatically. This will be changed
-# after we have provisioned the box
 service_name = 'rabbitmq-server'
-service service_name do
-  action %i[enable start]
-end
-
 #
 # ALLOW RABBITMQ THROUGH THE FIREWALL
 #
@@ -51,36 +45,15 @@ rabbitmq_plugin 'rabbitmq_auth_backend_ldap' do
   action :enable
 end
 
-#
-# DEFAULT VHOSTS AND QUEUES
-#
-
-logs_vhost = 'logs'
-rabbitmq_vhost logs_vhost do
-  action :add
-end
+# --> CONSUL PLUGIN: See: https://www.rabbitmq.com/cluster-formation.html
 
 #
 # CONNECT TO CONSUL
 #
 
-health_vhost = 'health'
-rabbitmq_vhost health_vhost do
-  action :add
-end
-
 rabbitmq_consul_test_user = 'consul'
 rabbitmq_consul_test_password = 'c0nsul'
-rabbitmq_user rabbitmq_consul_test_user do
-  action :add
-  password rabbitmq_consul_test_password
-end
-
-rabbitmq_user rabbitmq_consul_test_user do
-  action :set_permissions
-  permissions '.* .* .*'
-  vhost [health_vhost]
-end
+health_vhost = node['rabbitmq']['vhosts']['health']
 
 rabbitmq_proxy_path = node['rabbitmq']['proxy_path']
 file '/etc/consul/conf.d/rabbitmq.json' do
@@ -240,6 +213,33 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
       {
         rabbit, [
           {
+            auth_backends, [
+              rabbit_auth_backend_ldap,
+              rabbit_auth_backend_internal
+            ]
+          },
+          {
+            default_pass, <<"guest">>
+          },
+          {
+            default_user, <<"guest">>
+          },
+          {
+            heartbeat, 60
+          },
+          {
+            log_levels, [{ connection, info }]
+          },
+          {
+            loopback_users, [
+              <<"guest">>,
+              <<"consul">>
+            ]
+          },
+          {
+            reverse_dns_lookups, true
+          },
+          {
             tcp_listen_options, [
               binary,
               {packet,raw},
@@ -249,24 +249,6 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
               {exit_on_close,false},
               {keepalive,false},
               {linger, {true,0}}
-            ]
-          },
-          {
-            log_levels, [{ connection, info }]
-          },
-          {
-            default_user, <<"guest">>
-          },
-          {
-            default_pass, <<"guest">>
-          },
-          {
-            heartbeat, 60
-          },
-          {
-            auth_backends, [
-              rabbit_auth_backend_ldap,
-              rabbit_auth_backend_internal
             ]
           }
         ]

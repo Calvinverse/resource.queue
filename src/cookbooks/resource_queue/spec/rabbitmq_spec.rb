@@ -9,10 +9,8 @@ describe 'resource_queue::rabbitmq' do
     it 'installs the RabbitMQ service' do
       expect(chef_run).to include_recipe('rabbitmq::default')
       expect(chef_run).to include_recipe('rabbitmq::mgmt_console')
-    end
-
-    it 'enable the rabbit-mq service' do
-      expect(chef_run).to enable_service('rabbitmq-server')
+      expect(chef_run).to include_recipe('rabbitmq::user_management')
+      expect(chef_run).to include_recipe('rabbitmq::virtualhost_management')
     end
   end
 
