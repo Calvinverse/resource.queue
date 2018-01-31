@@ -34,7 +34,7 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-default['rabbitmq']['version'] = '3.6.15'
+default['rabbitmq']['version'] = '3.7.3'
 default['rabbitmq']['mnesiadir'] = '/srv/rabbitmq/data/mnesia'
 
 default['rabbitmq']['amqp_port'] = 5672
