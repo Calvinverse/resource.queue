@@ -38,16 +38,6 @@ firewall_rule 'rabbitmq-amqp' do
 end
 
 #
-# PLUGINS
-#
-
-rabbitmq_plugin 'rabbitmq_auth_backend_ldap' do
-  action :enable
-end
-
-# --> CONSUL PLUGIN: See: https://www.rabbitmq.com/cluster-formation.html
-
-#
 # CONNECT TO CONSUL
 #
 

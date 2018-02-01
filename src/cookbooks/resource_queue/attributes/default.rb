@@ -40,6 +40,10 @@ default['firewall']['ipv6_enabled'] = false
 default['rabbitmq']['version'] = '3.7.3'
 default['rabbitmq']['mnesiadir'] = '/srv/rabbitmq/data/mnesia'
 
+# plugins
+default['rabbitmq']['enabled_plugins'] = %w[
+  rabbitmq_auth_backend_ldap
+]
 
 default['rabbitmq']['vhosts']['health'] = 'health'
 default['rabbitmq']['vhosts']['logs'] = 'logs'
