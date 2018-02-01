@@ -44,6 +44,9 @@ default['rabbitmq']['mnesiadir'] = '/srv/rabbitmq/data/mnesia'
 default['rabbitmq']['enabled_plugins'] = %w[
   rabbitmq_auth_backend_ldap
 ]
+default['rabbitmq']['disabled_plugins'] = %w[
+  rabbitmq_management_visualiser
+]
 
 default['rabbitmq']['vhosts']['health'] = 'health'
 default['rabbitmq']['vhosts']['logs'] = 'logs'
