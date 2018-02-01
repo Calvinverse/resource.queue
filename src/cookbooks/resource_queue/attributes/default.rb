@@ -14,6 +14,9 @@ default['consul_template']['template_path'] = '/etc/consul-template.d/templates'
 default['erlang']['install_method'] = 'esl'
 default['erlang']['esl']['version'] = '20.1.7'
 
+default['erlang']['consul_template_erlang_cookie'] = 'erlang_cookie.ctmpl'
+default['erlang']['erlang_cookie'] = '/var/lib/rabbitmq/.erlang.cookie'
+
 #
 # FIREWALL
 #
