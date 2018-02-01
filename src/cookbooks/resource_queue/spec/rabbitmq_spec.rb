@@ -34,68 +34,6 @@ describe 'resource_queue::rabbitmq' do
     end
   end
 
-  context 'registers the service with consul' do
-    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
-
-    it 'creates the health vhost' do
-      expect(chef_run).to add_rabbitmq_vhost('health')
-    end
-
-    it 'creates the consul user' do
-      expect(chef_run).to add_rabbitmq_user('consul').with(
-        password: 'c0nsul'
-      )
-    end
-
-    it 'set the permission for the consul user' do
-      expect(chef_run).to set_permissions_rabbitmq_user('consul').with(
-        permissions: '.* .* .*',
-        vhost: %w[health]
-      )
-    end
-
-    consul_rabbitmq_config_content = <<~JSON
-      {
-        "services": [
-          {
-            "enableTagOverride": false,
-            "id": "rabbitmq.amqp",
-            "name": "queue",
-            "port": 5672,
-            "tags": [
-              "amqp"
-            ]
-          },
-          {
-            "checks": [
-              {
-                "http": "http://consul:c0nsul@localhost:15672/api/aliveness-test/health",
-                "id": "rabbitmq_health",
-                "interval": "15s",
-                "method": "GET",
-                "name": "RabbitMQ health",
-                "timeout": "5s"
-              }
-            ],
-            "enableTagOverride": false,
-            "id": "rabbitmq.http",
-            "name": "queue",
-            "port": 15672,
-            "tags": [
-              "http",
-              "management",
-              "edgeproxyprefix-/services/queue strip=/services/queue"
-            ]
-          }
-        ]
-      }
-    JSON
-    it 'creates the /etc/consul/conf.d/rabbitmq.json' do
-      expect(chef_run).to create_file('/etc/consul/conf.d/rabbitmq.json')
-        .with_content(consul_rabbitmq_config_content)
-    end
-  end
-
   context 'adds the consul-template files for rabbitmq' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 
@@ -202,6 +140,33 @@ describe 'resource_queue::rabbitmq' do
         {
           rabbit, [
             {
+              auth_backends, [
+                rabbit_auth_backend_ldap,
+                rabbit_auth_backend_internal
+              ]
+            },
+            {
+              default_pass, <<"guest">>
+            },
+            {
+              default_user, <<"guest">>
+            },
+            {
+              heartbeat, 60
+            },
+            {
+              log_levels, [{ connection, info }]
+            },
+            {
+              loopback_users, [
+                <<"guest">>,
+                <<"consul">>
+              ]
+            },
+            {
+              reverse_dns_lookups, true
+            },
+            {
               tcp_listen_options, [
                 binary,
                 {packet,raw},
@@ -211,24 +176,6 @@ describe 'resource_queue::rabbitmq' do
                 {exit_on_close,false},
                 {keepalive,false},
                 {linger, {true,0}}
-              ]
-            },
-            {
-              log_levels, [{ connection, info }]
-            },
-            {
-              default_user, <<"guest">>
-            },
-            {
-              default_pass, <<"guest">>
-            },
-            {
-              heartbeat, 60
-            },
-            {
-              auth_backends, [
-                rabbit_auth_backend_ldap,
-                rabbit_auth_backend_internal
               ]
             }
           ]

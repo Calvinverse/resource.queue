@@ -17,6 +17,7 @@ include_recipe 'rabbitmq::user_management'
 include_recipe 'rabbitmq::virtualhost_management'
 
 service_name = 'rabbitmq-server'
+
 #
 # ALLOW RABBITMQ THROUGH THE FIREWALL
 #
@@ -35,55 +36,6 @@ firewall_rule 'rabbitmq-amqp' do
   description 'Allow RabbitMQ AMQP traffic'
   dest_port rabbitmq_amqp_port
   direction :in
-end
-
-#
-# CONNECT TO CONSUL
-#
-
-rabbitmq_consul_test_user = 'consul'
-rabbitmq_consul_test_password = 'c0nsul'
-health_vhost = node['rabbitmq']['vhosts']['health']
-
-rabbitmq_proxy_path = node['rabbitmq']['proxy_path']
-file '/etc/consul/conf.d/rabbitmq.json' do
-  action :create
-  content <<~JSON
-    {
-      "services": [
-        {
-          "enableTagOverride": false,
-          "id": "rabbitmq.amqp",
-          "name": "queue",
-          "port": #{rabbitmq_amqp_port},
-          "tags": [
-            "amqp"
-          ]
-        },
-        {
-          "checks": [
-            {
-              "http": "http://#{rabbitmq_consul_test_user}:#{rabbitmq_consul_test_password}@localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
-              "id": "rabbitmq_health",
-              "interval": "15s",
-              "method": "GET",
-              "name": "RabbitMQ health",
-              "timeout": "5s"
-            }
-          ],
-          "enableTagOverride": false,
-          "id": "rabbitmq.http",
-          "name": "queue",
-          "port": #{rabbitmq_http_port},
-          "tags": [
-            "http",
-            "management",
-            "edgeproxyprefix-#{rabbitmq_proxy_path} strip=#{rabbitmq_proxy_path}"
-          ]
-        }
-      ]
-    }
-  JSON
 end
 
 #

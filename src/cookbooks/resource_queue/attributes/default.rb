@@ -43,57 +43,18 @@ default['rabbitmq']['mnesiadir'] = '/srv/rabbitmq/data/mnesia'
 # plugins
 default['rabbitmq']['enabled_plugins'] = %w[
   rabbitmq_auth_backend_ldap
+  rabbitmq_peer_discovery_consul
 ]
 default['rabbitmq']['disabled_plugins'] = %w[
   rabbitmq_management_visualiser
 ]
 
-default['rabbitmq']['vhosts']['health'] = 'health'
 default['rabbitmq']['vhosts']['logs'] = 'logs'
 
 default['rabbitmq']['virtualhosts'] = [
-  default['rabbitmq']['vhosts']['health'],
-  default['rabbitmq']['vhosts']['logs']
+  default['rabbitmq']['vhosts']['health']
 ]
 
-default['rabbitmq']['users']['guest']['name'] = 'guest'
-default['rabbitmq']['users']['guest']['password'] = 'guest'
-default['rabbitmq']['users']['consul']['name'] = 'consul'
-default['rabbitmq']['users']['consul']['password'] = 'consul'
-
-default['rabbitmq']['enabled_users'] = [
-  {
-    name: default['rabbitmq']['users']['guest']['name'],
-    password: default['rabbitmq']['users']['guest']['password'],
-    rights: [
-      {
-        vhost: nil,
-        conf: '.*',
-        write: '.*',
-        read: '.*'
-      }
-    ]
-  },
-  {
-    name: default['rabbitmq']['users']['consul']['name'],
-    password: default['rabbitmq']['users']['consul']['password'],
-    rights: [
-      {
-        vhost: 'health',
-        conf: '.*',
-        write: '.*',
-        read: '.*'
-      }
-    ]
-  }
-]
-
-# loopback_users
-# List of users which are only permitted to connect to the broker via a loopback interface (i.e. localhost).
-# If you wish to allow the default guest user to connect remotely, you need to change this to [].
-default['rabbitmq']['loopback_users'] = [
-  default['rabbitmq']['users']['guest']['name'],
-  default['rabbitmq']['users']['consul']['name']
 ]
 
 default['rabbitmq']['amqp_port'] = 5672
