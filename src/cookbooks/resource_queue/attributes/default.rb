@@ -55,6 +55,18 @@ default['rabbitmq']['virtualhosts'] = [
   default['rabbitmq']['vhosts']['health']
 ]
 
+# per default all policies and disabled policies are empty but need to be
+# defined
+default['rabbitmq']['policies'] = [
+  {
+    pattern: '^(?!amq\\.).*',
+    parameters: {
+      'ha-mode' => 'all',
+      'queue-master-locator' => 'min-masters',
+      'ha-sync-mode' => 'automatic'
+    },
+    priority: 1
+  }
 ]
 
 default['rabbitmq']['amqp_port'] = 5672
