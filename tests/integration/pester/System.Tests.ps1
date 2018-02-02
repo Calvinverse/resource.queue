@@ -10,6 +10,10 @@ Describe 'On the system' {
             $env:RESOURCE_NAME | Should Be '${ProductName}'
         }
 
+        It 'should have a short product name environment variable' {
+            $env:RESOURCE_SHORT_NAME | Should Be '${ProductShortName}'
+        }
+
         It 'should have an environment variable for the major version' {
             $env:RESOURCE_VERSION_MAJOR | Should Be '${VersionMajor}'
         }
