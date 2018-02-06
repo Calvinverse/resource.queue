@@ -26,7 +26,8 @@ file "#{consul_template_template_path}/#{consul_template_erlang_cookie}" do
   mode '755'
 end
 
-service_name = 'rabbitmq-server'
+rabbitmq_user = node['rabbitmq']['service_user']
+rabbitmq_group = node['rabbitmq']['service_group']
 erlang_cookie_file = node['erlang']['erlang_cookie']
 file "#{consul_template_config_path}/erlang_cookie.hcl" do
   action :create
@@ -53,7 +54,7 @@ file "#{consul_template_config_path}/erlang_cookie.hcl" do
       # command will only run if the resulting template changes. The command must
       # return within 30s (configurable), and it must have a successful exit code.
       # Consul Template is not a replacement for a process monitor or init system.
-      command = "systemctl restart #{service_name}"
+      command = "chown #{rabbitmq_user}:#{rabbitmq_group} #{erlang_cookie_file} && rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app"
 
       # This is the maximum amount of time to wait for the optional command to
       # return. Default is 30s.
@@ -69,7 +70,7 @@ file "#{consul_template_config_path}/erlang_cookie.hcl" do
       # unspecified, Consul Template will attempt to match the permissions of the
       # file that already exists at the destination path. If no file exists at that
       # path, the permissions are 0644.
-      # perms = 0600
+      perms = 0400
 
       # This option backs up the previously rendered template at the destination
       # path before writing a new one. It keeps exactly one backup. This option is

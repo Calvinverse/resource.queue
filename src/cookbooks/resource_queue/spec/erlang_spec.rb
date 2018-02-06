@@ -45,7 +45,7 @@ describe 'resource_queue::erlang' do
         # command will only run if the resulting template changes. The command must
         # return within 30s (configurable), and it must have a successful exit code.
         # Consul Template is not a replacement for a process monitor or init system.
-        command = "systemctl restart rabbitmq-server"
+        command = "chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app"
 
         # This is the maximum amount of time to wait for the optional command to
         # return. Default is 30s.
@@ -61,7 +61,7 @@ describe 'resource_queue::erlang' do
         # unspecified, Consul Template will attempt to match the permissions of the
         # file that already exists at the destination path. If no file exists at that
         # path, the permissions are 0644.
-        # perms = 0600
+        perms = 0400
 
         # This option backs up the previously rendered template at the destination
         # path before writing a new one. It keeps exactly one backup. This option is
