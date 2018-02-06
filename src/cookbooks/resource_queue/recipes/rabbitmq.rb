@@ -11,12 +11,33 @@
 # INSTALL RABBITMQ
 #
 
+# Don't include the managment console until they remove the visualiser
 include_recipe 'rabbitmq::default'
-include_recipe 'rabbitmq::mgmt_console'
+include_recipe 'rabbitmq::plugin_management'
 include_recipe 'rabbitmq::user_management'
 include_recipe 'rabbitmq::virtualhost_management'
 
-service_name = 'rabbitmq-server'
+#
+# SET PERMISSIONS ON DATA PATH
+#
+
+rabbitmq_service_path = node['rabbitmq']['service_data_path']
+directory rabbitmq_service_path do
+  action :create
+  group node['rabbitmq']['service_group']
+  mode '775'
+  owner node['rabbitmq']['service_user']
+  recursive true
+end
+
+rabbitmq_mnesia_path = node['rabbitmq']['mnesiadir']
+directory rabbitmq_mnesia_path do
+  action :create
+  group node['rabbitmq']['service_group']
+  mode '775'
+  owner node['rabbitmq']['service_user']
+  notifies :restart, "service[#{node['rabbitmq']['service_name']}]"
+end
 
 #
 # ALLOW RABBITMQ THROUGH THE FIREWALL
@@ -266,7 +287,7 @@ file "#{consul_template_config_path}/rabbitmq_config.hcl" do
       # command will only run if the resulting template changes. The command must
       # return within 30s (configurable), and it must have a successful exit code.
       # Consul Template is not a replacement for a process monitor or init system.
-      command = "systemctl restart #{service_name}"
+      command = "rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app"
 
       # This is the maximum amount of time to wait for the optional command to
       # return. Default is 30s.

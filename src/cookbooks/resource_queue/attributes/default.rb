@@ -37,11 +37,19 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-default['rabbitmq']['version'] = '3.7.3'
-default['rabbitmq']['mnesiadir'] = '/srv/rabbitmq/data/mnesia'
+rabbitmq_version = '3.7.3'
+default['rabbitmq']['version'] = rabbitmq_version
+
+# For some reason the rabbitmq cookbook doesn't do the right thing, eventhough it should
+default['rabbitmq']['deb_package'] = "rabbitmq-server_#{rabbitmq_version}-1_all.deb"
+default['rabbitmq']['deb_package_url'] = "https://dl.bintray.com/rabbitmq/all/rabbitmq-server/#{rabbitmq_version}/"
+
+default['rabbitmq']['service_data_path'] = '/srv/rabbitmq/dbase'
+default['rabbitmq']['mnesiadir'] = "#{node['rabbitmq']['service_data_path']}/mnesia"
 
 # plugins
 default['rabbitmq']['enabled_plugins'] = %w[
+  rabbitmq_management
   rabbitmq_auth_backend_ldap
   rabbitmq_peer_discovery_consul
 ]
@@ -52,7 +60,7 @@ default['rabbitmq']['disabled_plugins'] = %w[
 default['rabbitmq']['vhosts']['logs'] = 'logs'
 
 default['rabbitmq']['virtualhosts'] = [
-  default['rabbitmq']['vhosts']['health']
+  default['rabbitmq']['vhosts']['logs']
 ]
 
 # per default all policies and disabled policies are empty but need to be

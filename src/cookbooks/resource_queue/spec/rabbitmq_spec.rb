@@ -8,9 +8,25 @@ describe 'resource_queue::rabbitmq' do
 
     it 'installs the RabbitMQ service' do
       expect(chef_run).to include_recipe('rabbitmq::default')
-      expect(chef_run).to include_recipe('rabbitmq::mgmt_console')
+      expect(chef_run).to include_recipe('rabbitmq::plugin_management')
       expect(chef_run).to include_recipe('rabbitmq::user_management')
       expect(chef_run).to include_recipe('rabbitmq::virtualhost_management')
+    end
+
+    it 'creates and mounts the data file system at /srv/rabbitmq/dbase' do
+      expect(chef_run).to create_directory('/srv/rabbitmq/dbase').with(
+        group: 'rabbitmq',
+        mode: '775',
+        owner: 'rabbitmq'
+      )
+    end
+
+    it 'creates and mounts the data file system at /srv/rabbitmq/dbase/mnesia' do
+      expect(chef_run).to create_directory('/srv/rabbitmq/dbase/mnesia').with(
+        group: 'rabbitmq',
+        mode: '775',
+        owner: 'rabbitmq'
+      )
     end
   end
 
@@ -250,7 +266,7 @@ describe 'resource_queue::rabbitmq' do
         # command will only run if the resulting template changes. The command must
         # return within 30s (configurable), and it must have a successful exit code.
         # Consul Template is not a replacement for a process monitor or init system.
-        command = "systemctl restart rabbitmq-server"
+        command = "rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app"
 
         # This is the maximum amount of time to wait for the optional command to
         # return. Default is 30s.
