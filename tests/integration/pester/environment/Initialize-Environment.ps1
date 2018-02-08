@@ -65,11 +65,12 @@ function Set-ConsulKV
     & consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/datacenter 'test-integration'
     & consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/domain 'integrationtest'
 
-    # Load config/services/metrics
-    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/opentsdb/host 'opentsdb.metrics'
-    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/opentsdb/port '4242'
-    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/statsd/host 'statsd.metrics'
-    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/protocols/statsd/port '1234'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/consul/statsd/rules '*.*.* measurement.measurement.field\n*.*.*.* measurement.measurement.measurement.field'
+
+    # Explicitly don't provide a metrics address because that means telegraf will just send the metrics to
+    # a black hole
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/databases/system 'system'
+    & consul kv put -http-addr=http://127.0.0.1:8550 config/services/metrics/databases/statsd 'services'
 
     # load config/services/queue
     & consul kv put -http-addr=http://127.0.0.1:8550 config/services/queue/protocols/http/host 'http.queue'
@@ -98,12 +99,18 @@ function Set-VaultSecrets
 
 function Start-TestConsul
 {
+    if (-not (Test-Path /test/consul))
+    {
+        New-Item -Path /test/consul -ItemType Directory | Out-Null
+    }
+
     Write-Output "Starting consul ..."
-    Start-Process `
-        -FilePath consul `
-        -ArgumentList "agent -config-file /test/pester/consul/server.json" `
-        -RedirectStandardOutput /test/pester/consul/output.out `
-        -RedirectStandardError /test/pester/consul/error.out
+    $process = Start-Process `
+        -FilePath "consul" `
+        -ArgumentList "agent -config-file /test/pester/environment/consul.json" `
+        -PassThru `
+        -RedirectStandardOutput /test/consul/output.out `
+        -RedirectStandardError /test/consul/error.out
 }
 
 function Start-TestVault
