@@ -54,7 +54,7 @@ file "#{consul_template_config_path}/erlang_cookie.hcl" do
       # command will only run if the resulting template changes. The command must
       # return within 30s (configurable), and it must have a successful exit code.
       # Consul Template is not a replacement for a process monitor or init system.
-      command = "chown #{rabbitmq_user}:#{rabbitmq_group} #{erlang_cookie_file} && rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app"
+      command = "chown #{rabbitmq_user}:#{rabbitmq_group} #{erlang_cookie_file} && systemctl restart rabbitmq-server"
 
       # This is the maximum amount of time to wait for the optional command to
       # return. Default is 30s.
