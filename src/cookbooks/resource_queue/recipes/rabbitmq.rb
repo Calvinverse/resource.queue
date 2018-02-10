@@ -66,6 +66,20 @@ firewall_rule 'rabbitmq-amqp' do
   direction :in
 end
 
+firewall_rule 'rabbitmq-peer-discovery' do
+  command :allow
+  description 'Allow RabbitMQ peer discovery traffic'
+  dest_port 4369
+  direction :in
+end
+
+firewall_rule 'rabbitmq-erlang-internode' do
+  command :allow
+  description 'Allow RabbitMQ Erlang internode traffic'
+  dest_port (rabbitmq_amqp_port + 20_000)
+  direction :in
+end
+
 #
 # CONSUL-TEMPLATE FILES
 #

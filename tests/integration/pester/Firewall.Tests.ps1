@@ -5,7 +5,7 @@ Describe 'The firewall' {
         It 'should return a status' {
             $ufwOutput | Should Not Be $null
             $ufwOutput.GetType().FullName | Should Be 'System.Object[]'
-            $ufwOutput.Length | Should Be 29
+            $ufwOutput.Length | Should Be 33
         }
 
         It 'should be enabled' {
@@ -50,12 +50,20 @@ Describe 'The firewall' {
     }
 
     Context 'should allow rabbitmq' {
+        It 'on port 4369'{
+            ($ufwOutput | Where-Object {$_ -match '(4369/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
+        }
+
         It 'on port 5672'{
             ($ufwOutput | Where-Object {$_ -match '(5672/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
         }
 
         It 'on port 15672' {
             ($ufwOutput | Where-Object {$_ -match '(15672/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
+        }
+
+        It 'on port 25672' {
+            ($ufwOutput | Where-Object {$_ -match '(25672/tcp)\s*(ALLOW)\s*(Anywhere)'} ) | Should Not Be $null
         }
     }
 

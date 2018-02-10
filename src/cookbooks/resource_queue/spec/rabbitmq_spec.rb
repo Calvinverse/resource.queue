@@ -52,6 +52,22 @@ describe 'resource_queue::rabbitmq' do
         direction: :in
       )
     end
+
+    it 'opens the RabbitMQ peer discovery port' do
+      expect(chef_run).to create_firewall_rule('rabbitmq-peer-discovery').with(
+        command: :allow,
+        dest_port: 4369,
+        direction: :in
+      )
+    end
+
+    it 'opens the RabbitMQ Erlang internode traffic port' do
+      expect(chef_run).to create_firewall_rule('rabbitmq-erlang-internode').with(
+        command: :allow,
+        dest_port: 25672,
+        direction: :in
+      )
+    end
   end
 
   context 'adds the consul-template files for rabbitmq' do
