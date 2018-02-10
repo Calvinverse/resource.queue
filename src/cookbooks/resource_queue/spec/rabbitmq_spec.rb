@@ -191,7 +191,21 @@ describe 'resource_queue::rabbitmq' do
               heartbeat, 60
             },
             {
-              log_levels, [{ connection, info }]
+              log, [
+                {
+                  file, [
+                    {enabled, false}
+                  ]
+                }
+                {
+                  syslog, [
+                    {enabled, true},
+                    {level, info},
+                    {identity, "rabbitmq"},
+                    {facility, daemon}
+                  ]
+                }
+              ]
             },
             {
               loopback_users, [
@@ -212,6 +226,22 @@ describe 'resource_queue::rabbitmq' do
                 {exit_on_close,false},
                 {keepalive,false},
                 {linger, {true,0}}
+              ]
+            },
+            {
+              cluster_formation, [
+                {
+                  peer_discovery_backend, rabbit_peer_discovery_consul
+                },
+                {
+                  peer_discovery_consul, [
+                    { consul_svc, "queue" },
+                    { consul_svc_tags, ["ampq"] },
+                    { consul_svc_addr_auto, true },
+                    { consul_svc_addr_use_nodename, false },
+                    { consul_use_longname, false }
+                  ]
+                }
               ]
             }
           ]
@@ -286,7 +316,7 @@ describe 'resource_queue::rabbitmq' do
         # command will only run if the resulting template changes. The command must
         # return within 30s (configurable), and it must have a successful exit code.
         # Consul Template is not a replacement for a process monitor or init system.
-        command = "rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app"
+        command = "systemctl restart rabbitmq-server"
 
         # This is the maximum amount of time to wait for the optional command to
         # return. Default is 30s.

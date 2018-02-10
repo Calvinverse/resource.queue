@@ -212,7 +212,21 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
             heartbeat, 60
           },
           {
-            log_levels, [{ connection, info }]
+            log, [
+              {
+                file, [
+                  {enabled, false}
+                ]
+              }
+              {
+                syslog, [
+                  {enabled, true},
+                  {level, info},
+                  {identity, "rabbitmq"},
+                  {facility, daemon}
+                ]
+              }
+            ]
           },
           {
             loopback_users, [
@@ -233,6 +247,22 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
               {exit_on_close,false},
               {keepalive,false},
               {linger, {true,0}}
+            ]
+          },
+          {
+            cluster_formation, [
+              {
+                peer_discovery_backend, rabbit_peer_discovery_consul
+              },
+              {
+                peer_discovery_consul, [
+                  { consul_svc, "queue" },
+                  { consul_svc_tags, ["ampq"] },
+                  { consul_svc_addr_auto, true },
+                  { consul_svc_addr_use_nodename, false },
+                  { consul_use_longname, false }
+                ]
+              }
             ]
           }
         ]
