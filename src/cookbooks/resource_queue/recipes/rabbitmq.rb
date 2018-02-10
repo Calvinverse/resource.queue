@@ -17,6 +17,13 @@ include_recipe 'rabbitmq::plugin_management'
 include_recipe 'rabbitmq::user_management'
 include_recipe 'rabbitmq::virtualhost_management'
 
+# Make sure the consultemplate service doesn't start automatically. This will be changed
+# after we have provisioned the box
+rabbit_service_name = 'rabbitmq-server'
+service rabbit_service_name do
+  action :disable
+end
+
 #
 # SET PERMISSIONS ON DATA PATH
 #

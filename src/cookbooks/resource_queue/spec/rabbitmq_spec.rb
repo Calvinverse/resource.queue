@@ -13,6 +13,10 @@ describe 'resource_queue::rabbitmq' do
       expect(chef_run).to include_recipe('rabbitmq::virtualhost_management')
     end
 
+    it 'disables the rabbitmq service' do
+      expect(chef_run).to disable_service('rabbitmq-server')
+    end
+
     it 'creates and mounts the data file system at /srv/rabbitmq/dbase' do
       expect(chef_run).to create_directory('/srv/rabbitmq/dbase').with(
         group: 'rabbitmq',
