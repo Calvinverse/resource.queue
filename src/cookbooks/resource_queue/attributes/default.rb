@@ -90,3 +90,11 @@ default['rabbitmq']['script_cluster_file'] = '/tmp/rabbitmq_cluster.sh'
 
 default['rabbitmq']['consul_template_config_file'] = 'rabbitmq_config.ctmpl'
 default['rabbitmq']['config_file'] = '/etc/rabbitmq/rabbitmq.config'
+
+default['rabbitmq']['telegraf']['consul_template_inputs_file'] = 'telegraf_rabbitmq_inputs.ctmpl'
+
+#
+# TELEGRAF
+#
+
+default['telegraf']['config_directory'] = '/etc/telegraf/telegraf.d'
