@@ -274,7 +274,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
         rabbitmq_auth_backend_ldap, [
           {
             servers, [
-      {{ range ls "config/environment/directory/endpoints" }}
+      {{ range ls "config/environment/directory/endpoints/hosts" }}
               "{{ .Value }}"
       {{ end }}
             ]
