@@ -196,7 +196,7 @@ describe 'resource_queue::rabbitmq' do
                   file, [
                     {enabled, false}
                   ]
-                }
+                },
                 {
                   syslog, [
                     {enabled, true},

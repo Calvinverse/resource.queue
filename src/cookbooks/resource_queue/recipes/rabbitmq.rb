@@ -217,7 +217,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
                 file, [
                   {enabled, false}
                 ]
-              }
+              },
               {
                 syslog, [
                   {enabled, true},
