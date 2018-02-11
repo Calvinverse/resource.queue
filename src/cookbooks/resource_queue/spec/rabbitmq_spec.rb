@@ -64,7 +64,7 @@ describe 'resource_queue::rabbitmq' do
     it 'opens the RabbitMQ Erlang internode traffic port' do
       expect(chef_run).to create_firewall_rule('rabbitmq-erlang-internode').with(
         command: :allow,
-        dest_port: 25672,
+        dest_port: 25_672,
         direction: :in
       )
     end
@@ -376,7 +376,7 @@ describe 'resource_queue::rabbitmq' do
 
       [[inputs.rabbitmq]]
         ## Management Plugin url. (default: http://localhost:15672)
-        url = "http://localhost:#{rabbitmq_http_port}"
+        url = "http://localhost:15672"
 
         ## Credentials
         username = "guest"

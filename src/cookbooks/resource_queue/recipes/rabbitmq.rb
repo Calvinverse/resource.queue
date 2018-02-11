@@ -76,7 +76,7 @@ end
 firewall_rule 'rabbitmq-erlang-internode' do
   command :allow
   description 'Allow RabbitMQ Erlang internode traffic'
-  dest_port (rabbitmq_amqp_port + 20_000)
+  dest_port rabbitmq_amqp_port + 20_000
   direction :in
 end
 
