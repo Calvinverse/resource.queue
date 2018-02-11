@@ -58,10 +58,7 @@ default['rabbitmq']['disabled_plugins'] = %w[
 ]
 
 default['rabbitmq']['vhosts']['logs'] = 'logs'
-
-default['rabbitmq']['virtualhosts'] = [
-  default['rabbitmq']['vhosts']['logs']
-]
+default['rabbitmq']['vhosts']['health'] = 'health'
 
 # per default all policies and disabled policies are empty but need to be
 # defined
