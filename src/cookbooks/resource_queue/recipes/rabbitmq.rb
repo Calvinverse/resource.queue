@@ -402,8 +402,8 @@ file "#{consul_template_template_path}/#{telegraf_rabbitmq_inputs_template_file}
       url = "http://localhost:#{rabbitmq_http_port}"
 
       ## Credentials
-      username = "guest"
-      password = "guest"
+      username = "metrics"
+      password = "metrics"
 
       ## Optional SSL Config
       # ssl_ca = "/etc/telegraf/ca.pem"

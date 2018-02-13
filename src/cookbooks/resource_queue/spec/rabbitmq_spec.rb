@@ -381,8 +381,8 @@ describe 'resource_queue::rabbitmq' do
         url = "http://localhost:15672"
 
         ## Credentials
-        username = "guest"
-        password = "guest"
+        username = "metrics"
+        password = "metrics"
 
         ## Optional SSL Config
         # ssl_ca = "/etc/telegraf/ca.pem"
