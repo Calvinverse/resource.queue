@@ -25,96 +25,6 @@ service rabbit_service_name do
 end
 
 #
-# DEFINITIONS FILE
-#
-
-rabbit_definitions_file = ''
-file rabbit_definitions_file do
-  action :create
-  content <<~JSON
-    {
-      "rabbit_version":"#{node['rabbitmq']['version']}",
-      "users":[
-          {
-              "name":"consul",
-              "password_hash":"Uvzj4tcF7w9XSOuNzLtDTR/4OFvweJB6m0ugkRgyPpBc2Sy6",
-              "hashing_algorithm":"rabbit_password_hashing_sha256",
-              "tags":"management"
-          },
-          {
-              "name":"guest",
-              "password_hash":"zv3urDp7e7fv90odrBW1/4txIjBfvdeuhIdlI2zoUfvLrsym",
-              "hashing_algorithm":"rabbit_password_hashing_sha256",
-              "tags":"administrator"
-          }
-      ],
-      "vhosts":[
-          {
-              "name":"#{node['rabbitmq']['vhosts']['logs']}"
-          },
-          {
-              "name":"health"
-          }
-      ],
-      "permissions":[
-          {
-              "user":"logs",
-              "vhost":"#{node['rabbitmq']['vhosts']['logs']}",
-              "configure":".*",
-              "write":".*",
-              "read":".*"
-          },
-          {
-              "user":"consul",
-              "vhost":"#{node['rabbitmq']['vhosts']['health']}",
-              "configure":".*",
-              "write":".*",
-              "read":".*"
-          }
-      ],
-      "parameters":[
-      ],
-      "policies":[
-      ],
-      "queues":[
-          {
-              "name":"syslog",
-              "vhost":"#{node['rabbitmq']['vhosts']['logs']}",
-              "durable":true,
-              "auto_delete":false,
-              "arguments":{
-
-              }
-          },
-          {
-              "name":"eventlog",
-              "vhost":"#{node['rabbitmq']['vhosts']['logs']}",
-              "durable":true,
-              "auto_delete":false,
-              "arguments":{
-
-              }
-          },
-          {
-              "name":"aliveness-test",
-              "vhost":"#{node['rabbitmq']['vhosts']['health']}",
-              "durable":false,
-              "auto_delete":false,
-              "arguments":{
-
-              }
-          }
-      ],
-      "exchanges":[
-      ],
-      "bindings":[
-      ]
-    }
-  JSON
-  mode '755'
-end
-
-#
 # SET PERMISSIONS ON DATA PATH
 #
 
@@ -281,9 +191,6 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
                 port, #{rabbitmq_http_port}
               }
             ]
-          },
-          {
-            load_definitions, "#{rabbit_definitions_file}"
           }
         ]
       },
