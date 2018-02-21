@@ -261,7 +261,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_template_file}" do
               {
                 peer_discovery_consul, [
                   { consul_svc, "queue" },
-                  { consul_svc_tags, ["ampq"] },
+                  { consul_svc_tags, ["amqp"] },
                   { consul_svc_addr_auto, true },
                   { consul_svc_addr_use_nodename, false },
                   { consul_use_longname, false },
