@@ -70,6 +70,42 @@ describe 'resource_queue::rabbitmq' do
     end
   end
 
+  context 'registers the http service with consul' do
+    let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
+
+    consul_rabbitmq_config_content = <<~JSON
+      {
+        "services": [
+          {
+            "checks": [
+              {
+                "header": { "Authorization" : ["Basic aGVhbHRoOmhlYWx0aA=="]},
+                "http": "http://localhost:15672/api/aliveness-test/health",
+                "id": "rabbitmq_http_health_check",
+                "interval": "30s",
+                "method": "GET",
+                "name": "RabbitMQ HTTP health check",
+                "timeout": "5s"
+              }
+            ],
+            "enableTagOverride": false,
+            "id": "rabbitmq_management",
+            "name": "queue",
+            "port": 15672,
+            "tags": [
+              "edgeproxyprefix-/services/queue strip=/services/queue",
+              "http"
+            ]
+          }
+        ]
+      }
+    JSON
+    it 'creates the /etc/consul/conf.d/rabbitmq-http.json' do
+      expect(chef_run).to create_file('/etc/consul/conf.d/rabbitmq-http.json')
+        .with_content(consul_rabbitmq_config_content)
+    end
+  end
+
   context 'adds the consul-template files for rabbitmq' do
     let(:chef_run) { ChefSpec::SoloRunner.converge(described_recipe) }
 

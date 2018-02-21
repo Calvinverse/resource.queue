@@ -81,6 +81,44 @@ firewall_rule 'rabbitmq-erlang-internode' do
 end
 
 #
+# CONSUL FILES
+#
+
+# This assumes the health user is called 'health' and the password is 'health'
+health_vhost = node['rabbitmq']['vhosts']['health']
+proxy_path = node['rabbitmq']['proxy_path']
+file '/etc/consul/conf.d/rabbitmq-http.json' do
+  action :create
+  content <<~JSON
+    {
+      "services": [
+        {
+          "checks": [
+            {
+              "header": { "Authorization" : ["Basic aGVhbHRoOmhlYWx0aA=="]},
+              "http": "http://localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
+              "id": "rabbitmq_http_health_check",
+              "interval": "30s",
+              "method": "GET",
+              "name": "RabbitMQ HTTP health check",
+              "timeout": "5s"
+            }
+          ],
+          "enableTagOverride": false,
+          "id": "rabbitmq_management",
+          "name": "queue",
+          "port": #{rabbitmq_http_port},
+          "tags": [
+            "edgeproxyprefix-#{proxy_path} strip=#{proxy_path}",
+            "http"
+          ]
+        }
+      ]
+    }
+  JSON
+end
+
+#
 # CONSUL-TEMPLATE FILES
 #
 
