@@ -112,11 +112,7 @@ describe 'resource_queue::rabbitmq' do
     rabbitmq_cluster_template_content = <<~CONF
       #!/bin/sh
 
-      {{ if keyExists "config/services/consul/datacenter" }}
       rabbitmqctl set_cluster_name queue@{{ keyOrDefault "config/services/consul/datacenter" "consul" }}
-
-      systemctl enable rabbitmq-server
-      {{ end }}
     CONF
     it 'creates rabbitmq cluster template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/rabbitmq_cluster.ctmpl')

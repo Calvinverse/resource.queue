@@ -22,6 +22,8 @@ file '/etc/init.d/provision_image.sh' do
       if [ -f /srv/rabbitmq/dbase/mnesia ]; then
         rm -rf /srv/rabbitmq/dbase/mnesia
       fi
+
+      systemctl enable rabbitmq-server
     }
   BASH
   mode '755'

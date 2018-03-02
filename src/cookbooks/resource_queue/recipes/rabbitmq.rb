@@ -132,11 +132,7 @@ file "#{consul_template_template_path}/#{rabbitmq_cluster_template_file}" do
   content <<~CONF
     #!/bin/sh
 
-    {{ if keyExists "config/services/consul/datacenter" }}
     rabbitmqctl set_cluster_name queue@{{ keyOrDefault "config/services/consul/datacenter" "consul" }}
-
-    systemctl enable rabbitmq-server
-    {{ end }}
   CONF
   mode '755'
 end
