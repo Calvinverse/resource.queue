@@ -155,6 +155,9 @@ describe 'resource_queue::rabbitmq' do
               default_user, <<"guest">>
             },
             {
+              default_vhost, <<"health">>
+            },
+            {
               heartbeat, 60
             },
             {
@@ -172,7 +175,8 @@ describe 'resource_queue::rabbitmq' do
             {
               loopback_users, [
                 <<"guest">>,
-                <<"consul">>
+                <<"health">>,
+                <<"metrics">>
               ]
             },
             {

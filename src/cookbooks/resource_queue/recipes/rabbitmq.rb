@@ -187,6 +187,9 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
             default_user, <<"guest">>
           },
           {
+            default_vhost, <<"health">>
+          },
+          {
             heartbeat, 60
           },
           {
@@ -204,7 +207,8 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
           {
             loopback_users, [
               <<"guest">>,
-              <<"consul">>
+              <<"health">>,
+              <<"metrics">>
             ]
           },
           {
