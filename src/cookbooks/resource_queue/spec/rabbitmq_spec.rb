@@ -160,11 +160,6 @@ describe 'resource_queue::rabbitmq' do
             {
               log, [
                 {
-                  file, [
-                    {enabled, false}
-                  ]
-                },
-                {
                   syslog, [
                     {enabled, true},
                     {level, info},
