@@ -235,9 +235,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
                 peer_discovery_consul, [
                   { consul_svc, "queue" },
                   { consul_svc_tags, ["amqp"] },
-                  { consul_svc_addr_auto, true },
-                  { consul_svc_addr_use_nodename, false },
-                  { consul_use_longname, false },
+                  { consul_svc_addr_auto, false },
                   { consul_domain, {{ keyOrDefault "config/services/consul/domain" "unknown" }}},
                   { consul_lock_prefix, "data/services/queue" }
                 ]
