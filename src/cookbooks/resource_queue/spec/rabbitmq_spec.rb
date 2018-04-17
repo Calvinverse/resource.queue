@@ -223,6 +223,9 @@ describe 'resource_queue::rabbitmq' do
               ]
             },
             {
+              user_dn_pattern, "${username}@{{ key "config/environment/mail/suffix" }}"
+            },
+            {
               dn_lookup_attribute, "userPrincipalName"
             },
             {

@@ -255,6 +255,9 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
             ]
           },
           {
+            user_dn_pattern, "${username}@{{ key "config/environment/mail/suffix" }}"
+          },
+          {
             dn_lookup_attribute, "userPrincipalName"
           },
           {
