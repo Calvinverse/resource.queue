@@ -235,12 +235,12 @@ describe 'resource_queue::rabbitmq' do
               other_bind, as_user
             },
             {
-              vhost_access_query, { in_group, "{{ keyOrDefault "/config/environment/directory/query/groups/queue/administrators" "" }}" }
+              vhost_access_query, { in_group_nested, "{{ keyOrDefault "/config/environment/directory/query/groups/queue/administrators" "" }}" }
             },
             {
               tag_queries, [
                 {
-                  administrator, { in_group, "{{ keyOrDefault "/config/environment/directory/query/groups/queue/administrators" "" }}" }
+                  administrator, { in_group_nested, "{{ keyOrDefault "/config/environment/directory/query/groups/queue/administrators" "" }}" }
                 },
                 {
                   management, { constant, false }
