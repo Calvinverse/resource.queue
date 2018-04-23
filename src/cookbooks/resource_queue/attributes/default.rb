@@ -36,7 +36,7 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-rabbitmq_version = '3.7.3'
+rabbitmq_version = '3.7.4'
 default['rabbitmq']['version'] = rabbitmq_version
 
 # For some reason the rabbitmq cookbook doesn't do the right thing, eventhough it should
