@@ -79,8 +79,8 @@ describe 'resource_queue::rabbitmq' do
           {
             "checks": [
               {
-                "header": { "Authorization" : ["Basic aGVhbHRoOmhlYWx0aA=="]},
-                "http": "http://localhost:15672/api/aliveness-test/health",
+                "header": { "Authorization" : ["Basic dXNlci5oZWFsdGg6aGVhbHRo"]},
+                "http": "http://localhost:15672/api/aliveness-test/vhost.health",
                 "id": "rabbitmq_http_health_check",
                 "interval": "30s",
                 "method": "GET",
@@ -388,7 +388,7 @@ describe 'resource_queue::rabbitmq' do
         url = "http://localhost:15672"
 
         ## Credentials
-        username = "metrics"
+        username = "user.metrics"
         password = "metrics"
 
         ## Optional SSL Config

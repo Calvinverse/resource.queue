@@ -1,6 +1,6 @@
 config:
   - key: config/services/queue/logs/syslog/vhost
-    value: logs
+    value: vhost.logs
 
   - key: config/services/queue/protocols/http/host
     value: http.queue

@@ -56,7 +56,7 @@ default['rabbitmq']['disabled_plugins'] = %w[
   rabbitmq_management_visualiser
 ]
 
-default['rabbitmq']['vhosts']['health'] = 'health'
+default['rabbitmq']['vhosts']['health'] = 'vhost.health'
 
 default['rabbitmq']['amqp_port'] = 5672
 default['rabbitmq']['http_port'] = 15_672

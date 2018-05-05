@@ -84,7 +84,7 @@ end
 # CONSUL FILES
 #
 
-# This assumes the health user is called 'health' and the password is 'health'
+# This assumes the health user is called 'user.health' and the password is 'health'
 health_vhost = node['rabbitmq']['vhosts']['health']
 proxy_path = node['rabbitmq']['proxy_path']
 file '/etc/consul/conf.d/rabbitmq-http.json' do
@@ -95,7 +95,7 @@ file '/etc/consul/conf.d/rabbitmq-http.json' do
         {
           "checks": [
             {
-              "header": { "Authorization" : ["Basic aGVhbHRoOmhlYWx0aA=="]},
+              "header": { "Authorization" : ["Basic dXNlci5oZWFsdGg6aGVhbHRo"]},
               "http": "http://localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
               "id": "rabbitmq_http_health_check",
               "interval": "30s",
@@ -420,7 +420,7 @@ file "#{consul_template_template_path}/#{telegraf_rabbitmq_inputs_template_file}
       url = "http://localhost:#{rabbitmq_http_port}"
 
       ## Credentials
-      username = "metrics"
+      username = "user.metrics"
       password = "metrics"
 
       ## Optional SSL Config
