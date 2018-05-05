@@ -163,11 +163,9 @@ describe 'resource_queue::rabbitmq' do
             {
               log, [
                 {
-                  syslog, [
+                  console, [
                     {enabled, true},
-                    {level, info},
-                    {identity, "rabbitmq"},
-                    {facility, daemon}
+                    {level, info}
                   ]
                 }
               ]

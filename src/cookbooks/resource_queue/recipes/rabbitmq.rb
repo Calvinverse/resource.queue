@@ -195,11 +195,9 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
           {
             log, [
               {
-                syslog, [
+                console, [
                   {enabled, true},
-                  {level, info},
-                  {identity, "rabbitmq"},
-                  {facility, daemon}
+                  {level, info}
                 ]
               }
             ]
