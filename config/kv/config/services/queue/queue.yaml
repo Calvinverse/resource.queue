@@ -1,0 +1,15 @@
+config:
+  - key: config/services/queue/logs/syslog/vhost
+    value: vhost.logs
+
+  - key: config/services/queue/protocols/http/host
+    value: http.queue
+
+  - key: config/services/queue/protocols/http/port
+    value: 15672
+
+  - key: config/services/queue/protocols/amqp/host
+    value: amqp.queue
+
+  - key: config/services/queue/protocols/amqp/port
+    value: 5672

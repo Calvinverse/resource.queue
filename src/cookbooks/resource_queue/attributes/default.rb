@@ -36,7 +36,7 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-rabbitmq_version = '3.7.3'
+rabbitmq_version = '3.7.4'
 default['rabbitmq']['version'] = rabbitmq_version
 
 # For some reason the rabbitmq cookbook doesn't do the right thing, eventhough it should
@@ -56,7 +56,7 @@ default['rabbitmq']['disabled_plugins'] = %w[
   rabbitmq_management_visualiser
 ]
 
-default['rabbitmq']['vhosts']['health'] = 'health'
+default['rabbitmq']['vhosts']['health'] = 'vhost.health'
 
 default['rabbitmq']['amqp_port'] = 5672
 default['rabbitmq']['http_port'] = 15_672
