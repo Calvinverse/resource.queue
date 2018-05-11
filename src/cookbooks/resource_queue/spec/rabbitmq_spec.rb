@@ -215,7 +215,7 @@ describe 'resource_queue::rabbitmq' do
           rabbitmq_auth_backend_ldap, [
             {
               servers, [
-                {{ range ls "config/environment/directory/endpoints/hosts" }}{{ .Value | regexReplaceAll "(.*)" "\\"$1\\"" | join "," }}{{ end }}
+                {{range $index, $service := ls "config/environment/directory/endpoints/hosts" }}{{if ne $index 0}},{{end}}"{{ .Value }}"{{end}}
               ]
             },
             {

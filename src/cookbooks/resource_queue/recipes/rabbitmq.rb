@@ -247,7 +247,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
         rabbitmq_auth_backend_ldap, [
           {
             servers, [
-              {{ range ls "config/environment/directory/endpoints/hosts" }}{{ .Value | regexReplaceAll "(.*)" "\\"$1\\"" | join "," }}{{ end }}
+              {{range $index, $service := ls "config/environment/directory/endpoints/hosts" }}{{if ne $index 0}},{{end}}"{{ .Value }}"{{end}}
             ]
           },
           {
