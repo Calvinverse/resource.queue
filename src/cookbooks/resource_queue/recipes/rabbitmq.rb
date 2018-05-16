@@ -187,7 +187,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
             default_user, <<"guest">>
           },
           {
-            default_vhost, <<"health">>
+            default_vhost, <<"vhost.health">>
           },
           {
             heartbeat, 60

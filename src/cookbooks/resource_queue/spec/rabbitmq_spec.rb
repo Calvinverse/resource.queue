@@ -155,7 +155,7 @@ describe 'resource_queue::rabbitmq' do
               default_user, <<"guest">>
             },
             {
-              default_vhost, <<"health">>
+              default_vhost, <<"vhost.health">>
             },
             {
               heartbeat, 60
