@@ -307,7 +307,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
       done
     fi
 
-    systemctl restart #{rabbit_service_name}
+    systemctl restart --no-block #{rabbit_service_name} && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
     while true; do
       if ( $(systemctl is-active --quiet #{rabbit_service_name}) ); then
@@ -316,7 +316,6 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
 
       sleep 1
     done
-    rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
     {{ else }}
     echo 'Not all Consul K-V values are available. Will not start RabbitMQ.'

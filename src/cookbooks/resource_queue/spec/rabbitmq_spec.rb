@@ -275,7 +275,7 @@ describe 'resource_queue::rabbitmq' do
         done
       fi
 
-      systemctl restart rabbitmq-server
+      systemctl restart --no-block rabbitmq-server && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
       while true; do
         if ( $(systemctl is-active --quiet rabbitmq-server) ); then
@@ -284,7 +284,6 @@ describe 'resource_queue::rabbitmq' do
 
         sleep 1
       done
-      rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
       {{ else }}
       echo 'Not all Consul K-V values are available. Will not start RabbitMQ.'
