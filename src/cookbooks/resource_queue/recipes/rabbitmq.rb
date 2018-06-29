@@ -17,7 +17,7 @@ include_recipe 'rabbitmq::plugin_management'
 include_recipe 'rabbitmq::user_management'
 include_recipe 'rabbitmq::virtualhost_management'
 
-# Make sure the consultemplate service doesn't start automatically. This will be changed
+# Make sure the rabbitmq service doesn't start automatically. This will be changed
 # after we have provisioned the box
 rabbit_service_name = node['rabbitmq']['service_name']
 service rabbit_service_name do
@@ -233,9 +233,12 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
                 peer_discovery_consul, [
                   { consul_svc, "queue" },
                   { consul_svc_tags, ["amqp"] },
-                  { consul_svc_addr_auto, false },
-                  { consul_domain, {{ keyOrDefault "config/services/consul/domain" "unknown" }}},
-                  { consul_lock_prefix, "data/services/queue" }
+                  { consul_svc_addr_auto, true },
+                  { consul_svc_addr_use_nodename, false },
+                  { consul_use_longname, false },
+                  { consul_domain, "{{ keyOrDefault "config/services/consul/domain" "unknown" }}" },
+                  { consul_lock_prefix, "data/services/queue" },
+                  { consul_include_nodes_with_warnings, true }
                 ]
               }
             ]
@@ -307,7 +310,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
       done
     fi
 
-    systemctl restart --no-block #{rabbit_service_name} && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
+    systemctl restart #{rabbit_service_name} && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
     while true; do
       if ( $(systemctl is-active --quiet #{rabbit_service_name}) ); then
