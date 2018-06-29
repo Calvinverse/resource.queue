@@ -104,7 +104,7 @@ file '/etc/consul/conf.d/rabbitmq-http.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "rabbitmq_management",
           "name": "queue",
           "port": #{rabbitmq_http_port},
@@ -443,7 +443,7 @@ file "#{consul_template_template_path}/#{telegraf_rabbitmq_inputs_template_file}
       ## specified, metrics for all queues are gathered.
       # queues = ["telegraf"]
       [inputs.rabbitmq.tags]
-        influxdb_database = "{{ keyOrDefault "config/services/metrics/databases/services" "services" }}"
+        influxdb_database = "services"
   CONF
   mode '755'
 end

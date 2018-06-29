@@ -88,7 +88,7 @@ describe 'resource_queue::rabbitmq' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "rabbitmq_management",
             "name": "queue",
             "port": 15672,
@@ -275,7 +275,7 @@ describe 'resource_queue::rabbitmq' do
         done
       fi
 
-      systemctl restart --no-block rabbitmq-server && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
+      systemctl restart rabbitmq-server && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
       while true; do
         if ( $(systemctl is-active --quiet rabbitmq-server) ); then
