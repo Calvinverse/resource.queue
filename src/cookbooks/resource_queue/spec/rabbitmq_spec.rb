@@ -53,6 +53,14 @@ describe 'resource_queue::rabbitmq' do
       )
     end
 
+    it 'opens the RabbitMQ MQTT port' do
+      expect(chef_run).to create_firewall_rule('rabbitmq-mqtt').with(
+        command: :allow,
+        dest_port: 1883,
+        direction: :in
+      )
+    end
+
     it 'opens the RabbitMQ peer discovery port' do
       expect(chef_run).to create_firewall_rule('rabbitmq-peer-discovery').with(
         command: :allow,
@@ -103,6 +111,37 @@ describe 'resource_queue::rabbitmq' do
     it 'creates the /etc/consul/conf.d/rabbitmq-http.json' do
       expect(chef_run).to create_file('/etc/consul/conf.d/rabbitmq-http.json')
         .with_content(consul_rabbitmq_config_content)
+    end
+
+    consul_rabbitmq_mqtt_content = <<~JSON
+      {
+        "services": [
+          {
+            "checks": [
+              {
+                "header": { "Authorization" : ["Basic dXNlci5oZWFsdGg6aGVhbHRo"]},
+                "http": "http://localhost:15672/api/aliveness-test/vhost.health",
+                "id": "rabbitmq_mqtt_health_check",
+                "interval": "30s",
+                "method": "GET",
+                "name": "RabbitMQ MQTT health check",
+                "timeout": "5s"
+              }
+            ],
+            "enable_tag_override": false,
+            "id": "rabbitmq_mqtt",
+            "name": "queue",
+            "port": 1883,
+            "tags": [
+              "mqtt"
+            ]
+          }
+        ]
+      }
+    JSON
+    it 'creates the /etc/consul/conf.d/rabbitmq-mqtt.json' do
+      expect(chef_run).to create_file('/etc/consul/conf.d/rabbitmq-mqtt.json')
+        .with_content(consul_rabbitmq_mqtt_content)
     end
   end
 
@@ -190,6 +229,22 @@ describe 'resource_queue::rabbitmq' do
                 {exit_on_close,false},
                 {keepalive,false},
                 {linger, {true,0}}
+              ]
+            },
+            {
+              rabbitmq_mqtt, [
+                {
+                  default_pass, <<"guest">>
+                },
+                {
+                  default_user, <<"guest">>
+                },
+                {
+                  exchange, <<"amq.topic">>
+                },
+                {
+                  vhost, <<"vhost.mqtt">>
+                }
               ]
             },
             {

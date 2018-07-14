@@ -66,6 +66,14 @@ firewall_rule 'rabbitmq-amqp' do
   direction :in
 end
 
+rabbitmq_mqtt_port = node['rabbitmq']['mqtt_port']
+firewall_rule 'rabbitmq-mqtt' do
+  command :allow
+  description 'Allow RabbitMQ MQTT traffic'
+  dest_port rabbitmq_mqtt_port
+  direction :in
+end
+
 firewall_rule 'rabbitmq-peer-discovery' do
   command :allow
   description 'Allow RabbitMQ peer discovery traffic'
@@ -111,6 +119,36 @@ file '/etc/consul/conf.d/rabbitmq-http.json' do
           "tags": [
             "edgeproxyprefix-#{proxy_path} strip=#{proxy_path}",
             "http"
+          ]
+        }
+      ]
+    }
+  JSON
+end
+
+file '/etc/consul/conf.d/rabbitmq-mqtt.json' do
+  action :create
+  content <<~JSON
+    {
+      "services": [
+        {
+          "checks": [
+            {
+              "header": { "Authorization" : ["Basic dXNlci5oZWFsdGg6aGVhbHRo"]},
+              "http": "http://localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
+              "id": "rabbitmq_mqtt_health_check",
+              "interval": "30s",
+              "method": "GET",
+              "name": "RabbitMQ MQTT health check",
+              "timeout": "5s"
+            }
+          ],
+          "enable_tag_override": false,
+          "id": "rabbitmq_mqtt",
+          "name": "queue",
+          "port": #{rabbitmq_mqtt_port},
+          "tags": [
+            "mqtt"
           ]
         }
       ]
@@ -222,6 +260,22 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
               {exit_on_close,false},
               {keepalive,false},
               {linger, {true,0}}
+            ]
+          },
+          {
+            rabbitmq_mqtt, [
+              {
+                default_pass, <<"guest">>
+              },
+              {
+                default_user, <<"guest">>
+              },
+              {
+                exchange, <<"amq.topic">>
+              },
+              {
+                vhost, <<"vhost.mqtt">>
+              }
             ]
           },
           {

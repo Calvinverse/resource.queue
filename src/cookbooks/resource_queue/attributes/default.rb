@@ -51,6 +51,7 @@ default['rabbitmq']['enabled_plugins'] = %w[
   rabbitmq_management
   rabbitmq_auth_backend_ldap
   rabbitmq_peer_discovery_consul
+  rabbitmq_mqtt
 ]
 default['rabbitmq']['disabled_plugins'] = %w[
   rabbitmq_management_visualiser
@@ -60,6 +61,7 @@ default['rabbitmq']['vhosts']['health'] = 'vhost.health'
 
 default['rabbitmq']['amqp_port'] = 5672
 default['rabbitmq']['http_port'] = 15_672
+default['rabbitmq']['mqtt_port'] = 1883
 
 default['rabbitmq']['service_user'] = 'rabbitmq'
 default['rabbitmq']['service_group'] = 'rabbitmq'
