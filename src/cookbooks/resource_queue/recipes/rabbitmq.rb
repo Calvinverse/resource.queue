@@ -219,6 +219,9 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
             ]
           },
           {
+            cluster_partition_handling, autoheal
+          },
+          {
             default_pass, <<"guest">>
           },
           {

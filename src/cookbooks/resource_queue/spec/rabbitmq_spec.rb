@@ -188,6 +188,9 @@ describe 'resource_queue::rabbitmq' do
               ]
             },
             {
+              cluster_partition_handling, autoheal
+            },
+            {
               default_pass, <<"guest">>
             },
             {
