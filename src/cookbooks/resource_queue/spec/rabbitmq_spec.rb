@@ -20,7 +20,7 @@ describe 'resource_queue::rabbitmq' do
     it 'creates and mounts the data file system at /srv/rabbitmq/dbase' do
       expect(chef_run).to create_directory('/srv/rabbitmq/dbase').with(
         group: 'rabbitmq',
-        mode: '775',
+        mode: '750',
         owner: 'rabbitmq'
       )
     end
@@ -28,7 +28,7 @@ describe 'resource_queue::rabbitmq' do
     it 'creates and mounts the data file system at /srv/rabbitmq/dbase/mnesia' do
       expect(chef_run).to create_directory('/srv/rabbitmq/dbase/mnesia').with(
         group: 'rabbitmq',
-        mode: '775',
+        mode: '750',
         owner: 'rabbitmq'
       )
     end
@@ -356,6 +356,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates rabbitmq config script template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/rabbitmq_config_script.ctmpl')
         .with_content(rabbitmq_config_script_template_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
 
     consul_template_rabbitmq_config_content = <<~CONF
@@ -397,7 +402,7 @@ describe 'resource_queue::rabbitmq' do
         # unspecified, Consul Template will attempt to match the permissions of the
         # file that already exists at the destination path. If no file exists at that
         # path, the permissions are 0644.
-        perms = 0755
+        perms = 0550
 
         # This option backs up the previously rendered template at the destination
         # path before writing a new one. It keeps exactly one backup. This option is
@@ -426,6 +431,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates rabbitmq_config.hcl in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/conf/rabbitmq_config.hcl')
         .with_content(consul_template_rabbitmq_config_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
   end
 
@@ -477,6 +487,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates telegraf rabbitmq input template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/telegraf_rabbitmq_inputs.ctmpl')
         .with_content(telegraf_rabbit_inputs_template_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
 
     consul_template_telegraf_rabbit_inputs_content = <<~CONF
@@ -502,7 +517,7 @@ describe 'resource_queue::rabbitmq' do
         # command will only run if the resulting template changes. The command must
         # return within 30s (configurable), and it must have a successful exit code.
         # Consul Template is not a replacement for a process monitor or init system.
-        command = "systemctl reload telegraf"
+        command = "chown telegraf:telegraf /etc/telegraf/telegraf.d/inputs_rabbitmq.conf && systemctl reload telegraf"
 
         # This is the maximum amount of time to wait for the optional command to
         # return. Default is 30s.
@@ -518,7 +533,7 @@ describe 'resource_queue::rabbitmq' do
         # unspecified, Consul Template will attempt to match the permissions of the
         # file that already exists at the destination path. If no file exists at that
         # path, the permissions are 0644.
-        perms = 0755
+        perms = 0550
 
         # This option backs up the previously rendered template at the destination
         # path before writing a new one. It keeps exactly one backup. This option is
@@ -547,6 +562,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates telegraf_rabbitmq_inputs.hcl in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/conf/telegraf_rabbitmq_inputs.hcl')
         .with_content(consul_template_telegraf_rabbit_inputs_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
   end
 end
