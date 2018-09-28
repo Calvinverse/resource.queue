@@ -59,9 +59,9 @@ default['rabbitmq']['disabled_plugins'] = %w[
 
 default['rabbitmq']['vhosts']['health'] = 'vhost.health'
 
-default['rabbitmq']['amqp_port'] = 5672
+default['rabbitmq']['amqp_port'] = 5_672
 default['rabbitmq']['http_port'] = 15_672
-default['rabbitmq']['mqtt_port'] = 1883
+default['rabbitmq']['mqtt_port'] = 1_883
 
 default['rabbitmq']['service_user'] = 'rabbitmq'
 default['rabbitmq']['service_group'] = 'rabbitmq'
