@@ -15,5 +15,5 @@ supports 'ubuntu', '>= 16.04'
 
 depends 'erlang', '= 5.1.0'
 depends 'firewall', '= 2.6.2'
-depends 'rabbitmq', '= 5.4.0'
-depends 'systemd', '= 2.1.3'
+depends 'rabbitmq', '= 5.6.1'
+depends 'systemd', '= 3.2.3'
