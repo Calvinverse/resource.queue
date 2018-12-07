@@ -36,7 +36,7 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-rabbitmq_version = '3.7.4'
+rabbitmq_version = '3.7.8'
 default['rabbitmq']['version'] = rabbitmq_version
 
 # For some reason the rabbitmq cookbook doesn't do the right thing, eventhough it should
@@ -51,6 +51,7 @@ default['rabbitmq']['enabled_plugins'] = %w[
   rabbitmq_management
   rabbitmq_auth_backend_ldap
   rabbitmq_peer_discovery_consul
+  rabbitmq_mqtt
 ]
 default['rabbitmq']['disabled_plugins'] = %w[
   rabbitmq_management_visualiser
@@ -58,8 +59,9 @@ default['rabbitmq']['disabled_plugins'] = %w[
 
 default['rabbitmq']['vhosts']['health'] = 'vhost.health'
 
-default['rabbitmq']['amqp_port'] = 5672
+default['rabbitmq']['amqp_port'] = 5_672
 default['rabbitmq']['http_port'] = 15_672
+default['rabbitmq']['mqtt_port'] = 1_883
 
 default['rabbitmq']['service_user'] = 'rabbitmq'
 default['rabbitmq']['service_group'] = 'rabbitmq'
@@ -77,4 +79,6 @@ default['rabbitmq']['telegraf']['consul_template_inputs_file'] = 'telegraf_rabbi
 # TELEGRAF
 #
 
+default['telegraf']['service_user'] = 'telegraf'
+default['telegraf']['service_group'] = 'telegraf'
 default['telegraf']['config_directory'] = '/etc/telegraf/telegraf.d'

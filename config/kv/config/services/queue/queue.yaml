@@ -2,6 +2,9 @@ config:
   - key: config/services/queue/logs/syslog/vhost
     value: vhost.logs
 
+  - key: config/services/queue/logs/file/vhost
+    value: vhost.logs
+
   - key: config/services/queue/protocols/http/host
     value: http.queue
 
@@ -13,3 +16,9 @@ config:
 
   - key: config/services/queue/protocols/amqp/port
     value: 5672
+
+  - key: config/services/queue/protocols/mqtt/host
+    value: mqtt.queue
+
+  - key: config/services/queue/protocols/mqtt/port
+    value: 1883
