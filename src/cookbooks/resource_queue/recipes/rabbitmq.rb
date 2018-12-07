@@ -17,7 +17,7 @@ include_recipe 'rabbitmq::plugin_management'
 include_recipe 'rabbitmq::user_management'
 include_recipe 'rabbitmq::virtualhost_management'
 
-# Make sure the consultemplate service doesn't start automatically. This will be changed
+# Make sure the rabbitmq service doesn't start automatically. This will be changed
 # after we have provisioned the box
 rabbit_service_name = node['rabbitmq']['service_name']
 service rabbit_service_name do
@@ -32,7 +32,7 @@ rabbitmq_service_path = node['rabbitmq']['service_data_path']
 directory rabbitmq_service_path do
   action :create
   group node['rabbitmq']['service_group']
-  mode '775'
+  mode '750'
   owner node['rabbitmq']['service_user']
   recursive true
 end
@@ -41,7 +41,7 @@ rabbitmq_mnesia_path = node['rabbitmq']['mnesiadir']
 directory rabbitmq_mnesia_path do
   action :create
   group node['rabbitmq']['service_group']
-  mode '775'
+  mode '750'
   owner node['rabbitmq']['service_user']
   notifies :restart, "service[#{node['rabbitmq']['service_name']}]"
 end
@@ -63,6 +63,14 @@ firewall_rule 'rabbitmq-amqp' do
   command :allow
   description 'Allow RabbitMQ AMQP traffic'
   dest_port rabbitmq_amqp_port
+  direction :in
+end
+
+rabbitmq_mqtt_port = node['rabbitmq']['mqtt_port']
+firewall_rule 'rabbitmq-mqtt' do
+  command :allow
+  description 'Allow RabbitMQ MQTT traffic'
+  dest_port rabbitmq_mqtt_port
   direction :in
 end
 
@@ -104,13 +112,43 @@ file '/etc/consul/conf.d/rabbitmq-http.json' do
               "timeout": "5s"
             }
           ],
-          "enableTagOverride": false,
+          "enable_tag_override": false,
           "id": "rabbitmq_management",
           "name": "queue",
           "port": #{rabbitmq_http_port},
           "tags": [
             "edgeproxyprefix-#{proxy_path} strip=#{proxy_path}",
             "http"
+          ]
+        }
+      ]
+    }
+  JSON
+end
+
+file '/etc/consul/conf.d/rabbitmq-mqtt.json' do
+  action :create
+  content <<~JSON
+    {
+      "services": [
+        {
+          "checks": [
+            {
+              "header": { "Authorization" : ["Basic dXNlci5oZWFsdGg6aGVhbHRo"]},
+              "http": "http://localhost:#{rabbitmq_http_port}/api/aliveness-test/#{health_vhost}",
+              "id": "rabbitmq_mqtt_health_check",
+              "interval": "30s",
+              "method": "GET",
+              "name": "RabbitMQ MQTT health check",
+              "timeout": "5s"
+            }
+          ],
+          "enable_tag_override": false,
+          "id": "rabbitmq_mqtt",
+          "name": "queue",
+          "port": #{rabbitmq_mqtt_port},
+          "tags": [
+            "mqtt"
           ]
         }
       ]
@@ -181,13 +219,16 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
             ]
           },
           {
+            cluster_partition_handling, autoheal
+          },
+          {
             default_pass, <<"guest">>
           },
           {
             default_user, <<"guest">>
           },
           {
-            default_vhost, <<"health">>
+            default_vhost, <<"vhost.health">>
           },
           {
             heartbeat, 60
@@ -225,6 +266,22 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
             ]
           },
           {
+            rabbitmq_mqtt, [
+              {
+                default_pass, <<"guest">>
+              },
+              {
+                default_user, <<"guest">>
+              },
+              {
+                exchange, <<"amq.topic">>
+              },
+              {
+                vhost, <<"vhost.mqtt">>
+              }
+            ]
+          },
+          {
             cluster_formation, [
               {
                 peer_discovery_backend, rabbit_peer_discovery_consul
@@ -234,8 +291,9 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
                   { consul_svc, "queue" },
                   { consul_svc_tags, ["amqp"] },
                   { consul_svc_addr_auto, false },
-                  { consul_domain, {{ keyOrDefault "config/services/consul/domain" "unknown" }}},
-                  { consul_lock_prefix, "data/services/queue" }
+                  { consul_domain, "{{ keyOrDefault "config/services/consul/domain" "unknown" }}" },
+                  { consul_lock_prefix, "data/services/queue" },
+                  { consul_include_nodes_with_warnings, true }
                 ]
               }
             ]
@@ -247,9 +305,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
         rabbitmq_auth_backend_ldap, [
           {
             servers, [
-      {{ range ls "config/environment/directory/endpoints/hosts" }}
-              "{{ .Value }}"
-      {{ end }}
+              {{range $index, $service := ls "config/environment/directory/endpoints/hosts" }}{{if ne $index 0}},{{end}}"{{ .Value }}"{{end}}
             ]
           },
           {
@@ -309,7 +365,7 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
       done
     fi
 
-    systemctl restart #{rabbit_service_name}
+    systemctl restart #{rabbit_service_name} && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
     while true; do
       if ( $(systemctl is-active --quiet #{rabbit_service_name}) ); then
@@ -318,7 +374,6 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
 
       sleep 1
     done
-    rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
     {{ else }}
     echo 'Not all Consul K-V values are available. Will not start RabbitMQ.'
@@ -327,7 +382,9 @@ file "#{consul_template_template_path}/#{rabbitmq_config_script_template_file}" 
     echo 'Not all Consul K-V values are available. Will not start RabbitMQ.'
     {{ end }}
   CONF
-  mode '755'
+  group 'root'
+  mode '0550'
+  owner 'root'
 end
 
 rabbitmq_config_script_file = node['rabbitmq']['script_config_file']
@@ -372,7 +429,7 @@ file "#{consul_template_config_path}/rabbitmq_config.hcl" do
       # unspecified, Consul Template will attempt to match the permissions of the
       # file that already exists at the destination path. If no file exists at that
       # path, the permissions are 0644.
-      perms = 0755
+      perms = 0550
 
       # This option backs up the previously rendered template at the destination
       # path before writing a new one. It keeps exactly one backup. This option is
@@ -398,7 +455,9 @@ file "#{consul_template_config_path}/rabbitmq_config.hcl" do
       }
     }
   HCL
-  mode '755'
+  group 'root'
+  mode '0550'
+  owner 'root'
 end
 
 telegraf_service = 'telegraf'
@@ -446,9 +505,11 @@ file "#{consul_template_template_path}/#{telegraf_rabbitmq_inputs_template_file}
       ## specified, metrics for all queues are gathered.
       # queues = ["telegraf"]
       [inputs.rabbitmq.tags]
-        influxdb_database = "{{ keyOrDefault "config/services/metrics/databases/services" "services" }}"
+        influxdb_database = "services"
   CONF
-  mode '755'
+  group 'root'
+  mode '0550'
+  owner 'root'
 end
 
 file "#{consul_template_config_path}/telegraf_rabbitmq_inputs.hcl" do
@@ -476,7 +537,7 @@ file "#{consul_template_config_path}/telegraf_rabbitmq_inputs.hcl" do
       # command will only run if the resulting template changes. The command must
       # return within 30s (configurable), and it must have a successful exit code.
       # Consul Template is not a replacement for a process monitor or init system.
-      command = "systemctl reload #{telegraf_service}"
+      command = "/bin/bash -c 'chown #{node['telegraf']['service_user']}:#{node['telegraf']['service_group']} #{telegraf_config_directory}/inputs_rabbitmq.conf && systemctl restart #{telegraf_service}'"
 
       # This is the maximum amount of time to wait for the optional command to
       # return. Default is 30s.
@@ -492,7 +553,7 @@ file "#{consul_template_config_path}/telegraf_rabbitmq_inputs.hcl" do
       # unspecified, Consul Template will attempt to match the permissions of the
       # file that already exists at the destination path. If no file exists at that
       # path, the permissions are 0644.
-      perms = 0755
+      perms = 0550
 
       # This option backs up the previously rendered template at the destination
       # path before writing a new one. It keeps exactly one backup. This option is
@@ -518,5 +579,7 @@ file "#{consul_template_config_path}/telegraf_rabbitmq_inputs.hcl" do
       }
     }
   HCL
-  mode '755'
+  group 'root'
+  mode '0550'
+  owner 'root'
 end

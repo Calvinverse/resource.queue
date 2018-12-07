@@ -20,7 +20,7 @@ describe 'resource_queue::rabbitmq' do
     it 'creates and mounts the data file system at /srv/rabbitmq/dbase' do
       expect(chef_run).to create_directory('/srv/rabbitmq/dbase').with(
         group: 'rabbitmq',
-        mode: '775',
+        mode: '750',
         owner: 'rabbitmq'
       )
     end
@@ -28,7 +28,7 @@ describe 'resource_queue::rabbitmq' do
     it 'creates and mounts the data file system at /srv/rabbitmq/dbase/mnesia' do
       expect(chef_run).to create_directory('/srv/rabbitmq/dbase/mnesia').with(
         group: 'rabbitmq',
-        mode: '775',
+        mode: '750',
         owner: 'rabbitmq'
       )
     end
@@ -49,6 +49,14 @@ describe 'resource_queue::rabbitmq' do
       expect(chef_run).to create_firewall_rule('rabbitmq-amqp').with(
         command: :allow,
         dest_port: 5672,
+        direction: :in
+      )
+    end
+
+    it 'opens the RabbitMQ MQTT port' do
+      expect(chef_run).to create_firewall_rule('rabbitmq-mqtt').with(
+        command: :allow,
+        dest_port: 1883,
         direction: :in
       )
     end
@@ -88,7 +96,7 @@ describe 'resource_queue::rabbitmq' do
                 "timeout": "5s"
               }
             ],
-            "enableTagOverride": false,
+            "enable_tag_override": false,
             "id": "rabbitmq_management",
             "name": "queue",
             "port": 15672,
@@ -103,6 +111,37 @@ describe 'resource_queue::rabbitmq' do
     it 'creates the /etc/consul/conf.d/rabbitmq-http.json' do
       expect(chef_run).to create_file('/etc/consul/conf.d/rabbitmq-http.json')
         .with_content(consul_rabbitmq_config_content)
+    end
+
+    consul_rabbitmq_mqtt_content = <<~JSON
+      {
+        "services": [
+          {
+            "checks": [
+              {
+                "header": { "Authorization" : ["Basic dXNlci5oZWFsdGg6aGVhbHRo"]},
+                "http": "http://localhost:15672/api/aliveness-test/vhost.health",
+                "id": "rabbitmq_mqtt_health_check",
+                "interval": "30s",
+                "method": "GET",
+                "name": "RabbitMQ MQTT health check",
+                "timeout": "5s"
+              }
+            ],
+            "enable_tag_override": false,
+            "id": "rabbitmq_mqtt",
+            "name": "queue",
+            "port": 1883,
+            "tags": [
+              "mqtt"
+            ]
+          }
+        ]
+      }
+    JSON
+    it 'creates the /etc/consul/conf.d/rabbitmq-mqtt.json' do
+      expect(chef_run).to create_file('/etc/consul/conf.d/rabbitmq-mqtt.json')
+        .with_content(consul_rabbitmq_mqtt_content)
     end
   end
 
@@ -149,13 +188,16 @@ describe 'resource_queue::rabbitmq' do
               ]
             },
             {
+              cluster_partition_handling, autoheal
+            },
+            {
               default_pass, <<"guest">>
             },
             {
               default_user, <<"guest">>
             },
             {
-              default_vhost, <<"health">>
+              default_vhost, <<"vhost.health">>
             },
             {
               heartbeat, 60
@@ -193,6 +235,22 @@ describe 'resource_queue::rabbitmq' do
               ]
             },
             {
+              rabbitmq_mqtt, [
+                {
+                  default_pass, <<"guest">>
+                },
+                {
+                  default_user, <<"guest">>
+                },
+                {
+                  exchange, <<"amq.topic">>
+                },
+                {
+                  vhost, <<"vhost.mqtt">>
+                }
+              ]
+            },
+            {
               cluster_formation, [
                 {
                   peer_discovery_backend, rabbit_peer_discovery_consul
@@ -202,8 +260,9 @@ describe 'resource_queue::rabbitmq' do
                     { consul_svc, "queue" },
                     { consul_svc_tags, ["amqp"] },
                     { consul_svc_addr_auto, false },
-                    { consul_domain, {{ keyOrDefault "config/services/consul/domain" "unknown" }}},
-                    { consul_lock_prefix, "data/services/queue" }
+                    { consul_domain, "{{ keyOrDefault "config/services/consul/domain" "unknown" }}" },
+                    { consul_lock_prefix, "data/services/queue" },
+                    { consul_include_nodes_with_warnings, true }
                   ]
                 }
               ]
@@ -215,9 +274,7 @@ describe 'resource_queue::rabbitmq' do
           rabbitmq_auth_backend_ldap, [
             {
               servers, [
-        {{ range ls "config/environment/directory/endpoints/hosts" }}
-                "{{ .Value }}"
-        {{ end }}
+                {{range $index, $service := ls "config/environment/directory/endpoints/hosts" }}{{if ne $index 0}},{{end}}"{{ .Value }}"{{end}}
               ]
             },
             {
@@ -277,7 +334,7 @@ describe 'resource_queue::rabbitmq' do
         done
       fi
 
-      systemctl restart rabbitmq-server
+      systemctl restart rabbitmq-server && rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
       while true; do
         if ( $(systemctl is-active --quiet rabbitmq-server) ); then
@@ -286,7 +343,6 @@ describe 'resource_queue::rabbitmq' do
 
         sleep 1
       done
-      rabbitmqctl set_cluster_name queue@{{ key "config/services/consul/datacenter" }}
 
       {{ else }}
       echo 'Not all Consul K-V values are available. Will not start RabbitMQ.'
@@ -298,6 +354,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates rabbitmq config script template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/rabbitmq_config_script.ctmpl')
         .with_content(rabbitmq_config_script_template_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
 
     consul_template_rabbitmq_config_content = <<~CONF
@@ -339,7 +400,7 @@ describe 'resource_queue::rabbitmq' do
         # unspecified, Consul Template will attempt to match the permissions of the
         # file that already exists at the destination path. If no file exists at that
         # path, the permissions are 0644.
-        perms = 0755
+        perms = 0550
 
         # This option backs up the previously rendered template at the destination
         # path before writing a new one. It keeps exactly one backup. This option is
@@ -368,6 +429,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates rabbitmq_config.hcl in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/conf/rabbitmq_config.hcl')
         .with_content(consul_template_rabbitmq_config_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
   end
 
@@ -414,11 +480,16 @@ describe 'resource_queue::rabbitmq' do
         ## specified, metrics for all queues are gathered.
         # queues = ["telegraf"]
         [inputs.rabbitmq.tags]
-          influxdb_database = "{{ keyOrDefault "config/services/metrics/databases/services" "services" }}"
+          influxdb_database = "services"
     CONF
     it 'creates telegraf rabbitmq input template file in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/templates/telegraf_rabbitmq_inputs.ctmpl')
         .with_content(telegraf_rabbit_inputs_template_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
 
     consul_template_telegraf_rabbit_inputs_content = <<~CONF
@@ -444,7 +515,7 @@ describe 'resource_queue::rabbitmq' do
         # command will only run if the resulting template changes. The command must
         # return within 30s (configurable), and it must have a successful exit code.
         # Consul Template is not a replacement for a process monitor or init system.
-        command = "systemctl reload telegraf"
+        command = "/bin/bash -c 'chown telegraf:telegraf /etc/telegraf/telegraf.d/inputs_rabbitmq.conf && systemctl restart telegraf'"
 
         # This is the maximum amount of time to wait for the optional command to
         # return. Default is 30s.
@@ -460,7 +531,7 @@ describe 'resource_queue::rabbitmq' do
         # unspecified, Consul Template will attempt to match the permissions of the
         # file that already exists at the destination path. If no file exists at that
         # path, the permissions are 0644.
-        perms = 0755
+        perms = 0550
 
         # This option backs up the previously rendered template at the destination
         # path before writing a new one. It keeps exactly one backup. This option is
@@ -489,6 +560,11 @@ describe 'resource_queue::rabbitmq' do
     it 'creates telegraf_rabbitmq_inputs.hcl in the consul-template template directory' do
       expect(chef_run).to create_file('/etc/consul-template.d/conf/telegraf_rabbitmq_inputs.hcl')
         .with_content(consul_template_telegraf_rabbit_inputs_content)
+        .with(
+          group: 'root',
+          owner: 'root',
+          mode: '0550'
+        )
     end
   end
 end
