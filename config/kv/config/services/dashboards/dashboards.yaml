@@ -1,4 +1,0 @@
-config:
-  # Define the dashboard for RabbitMQ
-  - key: config/services/dashboards/metrics/provisioning/dashboards/services/service-queue
-    file: dashboards/services/service-queue.json
