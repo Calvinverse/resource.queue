@@ -12,7 +12,7 @@ default['consul_template']['template_path'] = '/etc/consul-template.d/templates'
 #
 
 default['erlang']['install_method'] = 'esl'
-default['erlang']['esl']['version'] = '1:20.2.2'
+default['erlang']['esl']['version'] = '1:22.2.1-1'
 
 default['erlang']['erlang_cookie'] = '/var/lib/rabbitmq/.erlang.cookie'
 
@@ -36,7 +36,7 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-rabbitmq_version = '3.7.9'
+rabbitmq_version = '3.8.2'
 default['rabbitmq']['version'] = rabbitmq_version
 
 # For some reason the rabbitmq cookbook doesn't do the right thing, eventhough it should
