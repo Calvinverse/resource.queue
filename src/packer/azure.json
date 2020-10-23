@@ -48,6 +48,63 @@
     ],
     "provisioners": [
         {
+            "expect_disconnect": false,
+            "inline": [
+                "sudo -S -E apt-get install --assume-yes scsitools"
+            ],
+            "type": "shell"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "echo \" LIST BLOCK DEVICES ...\"",
+                "sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL",
+                "echo \" LIST DRIVES ...\"",
+                "sudo fdisk -l"
+            ],
+            "type": "shell"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "sudo mkdir -p /srv/rabbitmq"
+            ],
+            "pause_before": "15s",
+            "type": "shell"
+        },
+        {
+            "execute_command": "echo 'packer' | sudo -S bash -c '{{ .Vars }} {{ .Path }}'",
+            "expect_disconnect": false,
+            "script": "build/format_drives.sh",
+            "type": "shell"
+        },
+        {
+            "expect_disconnect": true,
+            "inline": [
+                "sudo shutdown -r now"
+            ],
+            "type": "shell"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "echo \"System should have rebooted ...\""
+            ],
+            "pause_before": "15s",
+            "type": "shell"
+        },
+        {
+            "expect_disconnect": false,
+            "inline": [
+                "echo \" LIST BLOCK DEVICES ...\"",
+                "sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL",
+                "echo \" LIST DRIVES ...\"",
+                "sudo fdisk -l"
+            ],
+            "type": "shell"
+        },
+
+        {
             "cookbook_paths": [
                 "{{ user `dir_cookbooks_vendors` }}"
             ],
