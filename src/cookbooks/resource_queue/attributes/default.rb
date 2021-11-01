@@ -36,12 +36,12 @@ default['firewall']['ipv6_enabled'] = false
 # RABBITMQ
 #
 
-rabbitmq_version = '3.8.5'
+rabbitmq_version = '3.8.19'
 default['rabbitmq']['version'] = rabbitmq_version
 
 # For some reason the rabbitmq cookbook doesn't do the right thing, eventhough it should
 default['rabbitmq']['deb_package'] = "rabbitmq-server_#{rabbitmq_version}-1_all.deb"
-default['rabbitmq']['deb_package_url'] = "https://dl.bintray.com/rabbitmq/all/rabbitmq-server/#{rabbitmq_version}/"
+default['rabbitmq']['deb_package_url'] = "https://github.com/rabbitmq/rabbitmq-server/releases/download/v#{rabbitmq_version}/"
 
 default['rabbitmq']['service_data_path'] = '/srv/rabbitmq/dbase'
 default['rabbitmq']['mnesiadir'] = "#{node['rabbitmq']['service_data_path']}/mnesia"
